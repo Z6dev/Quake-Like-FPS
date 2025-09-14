@@ -1,4 +1,4 @@
-CompileCommands:
+CompileFlags:
     Add:
         - -I/workspaces/Quake-Like-FPS/extras/raylib/src
         - -I/workspaces/Quake-Like-FPS/extras/emsdk/upstream/emscripten/cache/sysroot/include
