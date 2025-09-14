@@ -53,7 +53,6 @@ Camera3D camera = {0};
 Sound fxShoot;
 Sound fxWalk;
 Sound fxJump;
-Music bgOst;
 //----------------------------------------------------------------------------------
 // Module Functions Declaration
 //----------------------------------------------------------------------------------
@@ -76,14 +75,13 @@ int main(void) {
 
     // Preload Meshes
     //---------------------------------------------------
-    bgOst = LoadMusicStream("resources/bg.mp3");
     fxShoot = LoadSound("resources/chaingun.ogg");
     fxWalk = LoadSound("resources/walk.mp3");
     fxJump = LoadSound("resources/ha.mp3");
-    SetMusicVolume(bgOst, 0.0f);
 
     // Initialize player Variables
     player.body = (Body){0};
+    player.body.position = (Vector3){0.0f, 2.0f, 0.0f};
     player.lookRotation = (Vector2){0};
     player.headTimer = 0.0f;
     player.walkLerp = 0.0f;
@@ -135,7 +133,6 @@ void GameLoop(void) {
     // Inits
     //---------------------------------------------------
     if (!GameInitialized) {
-        PlayMusicStream(bgOst);
         GameInitialized = true;
     }
 
@@ -144,9 +141,6 @@ void GameLoop(void) {
             DisableCursor();
         }
     }
-
-    UpdateMusicStream(bgOst);
-    
 
     static double lastShotTime;
     static float walkTimer;

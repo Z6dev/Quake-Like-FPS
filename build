@@ -1,5 +1,0 @@
-#!/bin/bash
-
-cd /workspaces/Quake-Like-FPS/src
-emcc -o dist/index.html main.c entities/body.c entities/bullet.c entities/camera_fps.c -Os -Wall /workspaces/Quake-Like-FPS/extras/raylib/src/libraylib.web.a -I. -I/workspaces/Quake-Like-FPS/extras/raylib/src -L. -L/workspaces/Quake-Like-FPS/extras/raylib/src -s USE_GLFW=3 --shell-file /workspaces/Quake-Like-FPS/extras/shell.html -DPLATFORM_WEB --preload-file resources
-emrun --no-browser dist
