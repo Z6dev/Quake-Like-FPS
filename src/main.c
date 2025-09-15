@@ -1,8 +1,11 @@
 #include "emscripten/emscripten.h"
 #include "raylib.h"
 #include "raymath.h"
+#include "rlgl.h"
 
+#include <math.h>
 #include <stdbool.h>
+#include <stdio.h>
 
 #include "entities/body.h"
 #include "entities/bullet.h"
@@ -27,6 +30,7 @@ void obstacles_init() {
     obstacles[1] = (Obstacle){(Vector3){-3.0f, 0.0f, 0.0f}, (Vector3){3.0f, 10.0f, 3.0f}};
 
     obstacles[2] = (Obstacle){(Vector3){3.0f, 0.0f, 3.0f}, (Vector3){8.0f, 0.5f, 3.0f}};
+    obstacles[3] = (Obstacle){(Vector3){3.0f, 0.5f, 3.0f}, (Vector3){5.0f, 0.5f, 3.0f}};
 }
 
 //----------------------------------------------------------------------------------
@@ -35,6 +39,41 @@ void obstacles_init() {
 
 #define MAX_PLAYER_BULLETS 64
 static Bullet playerBullets[MAX_PLAYER_BULLETS];
+
+//----------------------------------------------------------------------------------
+// Maurice Enemies
+//----------------------------------------------------------------------------------
+
+typedef struct {
+    Obstacle obstacle;
+    Vector3 direction;
+} Maurice;
+
+void Update_Maurice(Player* player, Maurice* murice) {
+    // Get vector from Maurice to player
+    Vector3 direction = Vector3Subtract(
+        (Vector3){player->body.position.x, player->body.position.y, player->body.position.z},
+        murice->obstacle.position);
+    float distance = Vector3Length(direction);
+
+    // Normalize direction
+    if (distance > 0.0f) {
+        murice->direction = Vector3Scale(direction, 1.0f / distance);
+    }
+
+    float stopDistance = 4.0f; // how close he should get before stopping
+    float speed = 0.05f;       // how fast Maurice moves
+
+    if (distance > stopDistance) {
+        // Move Maurice toward player
+        Vector3 moveTowardsDir = Vector3Subtract(
+            (Vector3){player->body.position.x, player->body.position.y + 2.5f, player->body.position.z},
+            murice->obstacle.position);
+
+        murice->obstacle.position =
+            Vector3Add(murice->obstacle.position, Vector3Scale(Vector3Normalize(moveTowardsDir), speed));
+    }
+}
 
 //----------------------------------------------------------------------------------
 // Global Variables Definition
@@ -49,6 +88,8 @@ Vector2 sensitivity = {0.005f, 0.005f};
 
 Player player = {0};
 Camera3D camera = {0};
+Maurice myMurice = {(Obstacle){(Vector3){6.0f, 4.0f, 6.0f}, (Vector3){2.0f, 3.0f, 2.0f}},
+                    (Vector3){0, 0, 0}};
 
 Sound fxShoot;
 Sound fxWalk;
@@ -75,9 +116,9 @@ int main(void) {
 
     // Preload Meshes
     //---------------------------------------------------
-    fxShoot = LoadSound("resources/chaingun.ogg");
-    fxWalk = LoadSound("resources/walk.mp3");
-    fxJump = LoadSound("resources/ha.mp3");
+    fxShoot = LoadSound("resources/sfx/chaingun.ogg");
+    fxWalk = LoadSound("resources/sfx/walk.mp3");
+    fxJump = LoadSound("resources/sfx/ha.mp3");
 
     // Initialize player Variables
     player.body = (Body){0};
@@ -167,12 +208,12 @@ void GameLoop(void) {
             PlaySound(fxShoot);
 
             bullet_spawn(playerBullets, MAX_PLAYER_BULLETS, player.body.position, camForwardDir,
-                         100);
+                         100, 0.5f);
             lastShotTime = GetTime();
         }
     }
 
-    bullet_update(playerBullets, MAX_PLAYER_BULLETS);
+    bullet_update(playerBullets, MAX_PLAYER_BULLETS, obstacles, MAX_OBSTACLES);
 
     // Update Player
     //----------------------------------------------------------------------------------
@@ -211,6 +252,10 @@ void GameLoop(void) {
         StopSound(fxWalk);
         walkTimer = 3.0f;
     }
+
+    //----------------------------------------------------------------------------------
+    // Update Maurice
+    Update_Maurice(&player, &myMurice);
 
     //----------------------------------------------------------------------------------
     // Handle Camera and Camera Effects
@@ -253,12 +298,17 @@ void GameLoop(void) {
             continue;
         }
 
-        DrawSphere(playerBullets[i].Pos, 0.7, BLUE);
-        DrawSphereWires(playerBullets[i].Pos, 0.8, 6, 6, DARKBLUE);
+        DrawSphere(playerBullets[i].Pos, playerBullets[i].size, BLUE);
+        DrawSphereWires(playerBullets[i].Pos, playerBullets[i].size + 0.1f, 6, 6, DARKBLUE);
     }
 
     DrawLevel();
     EndMode3D();
+
+    char debugtext_buf[64];
+    snprintf(debugtext_buf, 64, "%.2f %.2f %.2f", myMurice.direction.x, myMurice.direction.y,
+             myMurice.direction.z);
+    DrawText(debugtext_buf, 0, 0, 16, RAYWHITE);
 
     // Draw Debug Info
     DrawFPS(screenWidth - 100, 0);
@@ -300,6 +350,31 @@ void DrawLevel(void) {
         DrawCubeWiresV(ObstacleDrawPos, obstacles[i].size, DARKPURPLE);
     }
 
+    {
+        // Draw Maurice
+        Vector3 MuriceDrawPos =
+            (Vector3){myMurice.obstacle.position.x,
+                      myMurice.obstacle.position.y + myMurice.obstacle.size.y / 2.0f,
+                      myMurice.obstacle.position.z};
+        // Compute angles bruh
+        Vector3 dir = myMurice.direction;
+        float yaw = atan2f(dir.x, dir.z) * RAD2DEG;
+        float pitch = -atan2f(dir.y, sqrtf(dir.x * dir.x + dir.z * dir.z)) * RAD2DEG;
+
+        rlPushMatrix();
+        rlTranslatef(MuriceDrawPos.x, MuriceDrawPos.y, MuriceDrawPos.z);
+
+        // Rotate Maurice
+        rlRotatef(yaw, 0.0f, 1.0f, 0.0f);
+        rlRotatef(pitch, 1.0f, 0.0f, 0.0f);
+
+        // Finally draw him
+        DrawCubeV(Vector3Zero(), myMurice.obstacle.size, GRAY);
+        DrawCubeWiresV(Vector3Zero(), myMurice.obstacle.size, RAYWHITE);
+        rlPopMatrix();
+    }
+
+    // Draw Player
     DrawBoundingBox(GetBoundingBox(player.body.position, (Vector3){1.0f, 2.0f, 1.0f}), GREEN);
 
     // Red sun

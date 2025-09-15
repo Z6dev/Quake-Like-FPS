@@ -12,7 +12,8 @@
 #define AIR_DRAG 0.98f
 // Responsiveness for turning movement direction to looked direction
 #define CONTROL 15.0f
-
+// Defined for the step height, self explanatory
+#define STEP_HEIGHT 0.6f
 
 // Update body considering current world state
 void UpdatePlayerBody(Body* body, float rot, char side, char forward, bool jumpPressed,
@@ -66,6 +67,11 @@ void UpdatePlayerBody(Body* body, float rot, char side, char forward, bool jumpP
     for (int i = 0; i < elem_num; i++) {
         BoundingBox obsBox = GetBoundingBox(obstacles[i].position, obstacles[i].size);
         if (CheckCollisionBoxes(playerBox, obsBox)) {
+            if (obsBox.max.y - playerBox.min.y < STEP_HEIGHT) { // Checks if the player can Climb the step
+                body->position.y = obsBox.max.y += 0.01f;
+                body->velocity.y = 0.0f;
+            }
+
             body->position.x = body->prevPos.x; // cancel X move
             break;
         }
@@ -77,6 +83,11 @@ void UpdatePlayerBody(Body* body, float rot, char side, char forward, bool jumpP
     for (int i = 0; i < elem_num; i++) {
         BoundingBox obsBox = GetBoundingBox(obstacles[i].position, obstacles[i].size);
         if (CheckCollisionBoxes(playerBox, obsBox)) {
+            if (obsBox.max.y - playerBox.min.y < STEP_HEIGHT) { // The same as above, but on the Z axis.
+                body->position.y = obsBox.max.y += 0.01f;
+                body->velocity.y = 0.0f;
+            }
+
             body->position.z = body->prevPos.z; // cancel Z move
             break;
         }
@@ -88,9 +99,11 @@ void UpdatePlayerBody(Body* body, float rot, char side, char forward, bool jumpP
     for (int i = 0; i < elem_num; i++) {
         BoundingBox obsBox = GetBoundingBox(obstacles[i].position, obstacles[i].size);
         if (CheckCollisionBoxes(playerBox, obsBox)) {
-            body->position.y = body->prevPos.y; // cancel Z move
+            body->position.y = body->prevPos.y; // cancel Y move
             body->isGrounded = true;
             break;
+        } else {
+            body->isGrounded = false;
         }
     }
 
