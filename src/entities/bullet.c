@@ -11,7 +11,8 @@ void bullet_init(Bullet* bullets, int maxBullets) {
 }
 
 // Spawns a Bullet
-void bullet_spawn(Bullet* bullets, int maxBullets, Vector3 StartPos, Vector3 Dir, float speed, float size) {
+void bullet_spawn(Bullet* bullets, int maxBullets, Vector3 StartPos, Vector3 Dir, float speed,
+                  float size, float life) {
     float length = Vector3Length(Dir);
     if (length == 0)
         return;
@@ -21,9 +22,9 @@ void bullet_spawn(Bullet* bullets, int maxBullets, Vector3 StartPos, Vector3 Dir
         if (!bullets[i].active) {
             bullets[i].Pos = StartPos;
             bullets[i].Vel = Vector3Multiply(Dir, (Vector3){speed, speed, speed});
-            bullets[i].life = 2.0f;
+            bullets[i].life = life;
             bullets[i].active = true;
-            bullets[i].size = 0.7f;
+            bullets[i].size = size;
             break;
         }
     }
@@ -36,11 +37,12 @@ void bullet_update(Bullet* bullets, int maxBullets, Obstacle* obstacles, int max
     for (int i = 0; i < maxBullets; i++) {
         if (bullets[i].active) {
             bullets[i].Pos = Vector3Add(bullets[i].Pos, Vector3Scale(bullets[i].Vel, deltaTime));
-            
-            
+
             for (int j = 0; j < maxObstacles; j++) {
+                if (obstacles == 0 || maxObstacles == 0)
+                    break;
                 BoundingBox obstacleBox = GetBoundingBox(obstacles[j].position, obstacles[j].size);
-                
+
                 if (CheckCollisionBoxSphere(obstacleBox, bullets[i].Pos, bullets[i].size)) {
                     bullets[i].active = false;
                     break;

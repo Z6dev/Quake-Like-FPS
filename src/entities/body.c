@@ -2,19 +2,6 @@
 #include "raylib.h"
 #include "raymath.h"
 
-#define GRAVITY 32.0f
-#define CROUCH_SPEED 5.0f
-#define JUMP_FORCE 12.0f
-#define MAX_ACCEL 150.0f
-// Grounded drag
-#define FRICTION 0.86f
-// Increasing air drag, increases strafing speed
-#define AIR_DRAG 0.98f
-// Responsiveness for turning movement direction to looked direction
-#define CONTROL 15.0f
-// Defined for the step height, self explanatory
-#define STEP_HEIGHT 0.6f
-
 // Update body considering current world state
 void UpdatePlayerBody(Body* body, float rot, char side, char forward, bool jumpPressed,
                       bool crouchHold, Obstacle* obstacles, int elem_num) {
@@ -67,7 +54,8 @@ void UpdatePlayerBody(Body* body, float rot, char side, char forward, bool jumpP
     for (int i = 0; i < elem_num; i++) {
         BoundingBox obsBox = GetBoundingBox(obstacles[i].position, obstacles[i].size);
         if (CheckCollisionBoxes(playerBox, obsBox)) {
-            if (obsBox.max.y - playerBox.min.y < STEP_HEIGHT) { // Checks if the player can Climb the step
+            if (obsBox.max.y - playerBox.min.y <
+                STEP_HEIGHT) { // Checks if the player can Climb the step
                 body->position.y = obsBox.max.y += 0.01f;
                 body->velocity.y = 0.0f;
             }
@@ -83,7 +71,8 @@ void UpdatePlayerBody(Body* body, float rot, char side, char forward, bool jumpP
     for (int i = 0; i < elem_num; i++) {
         BoundingBox obsBox = GetBoundingBox(obstacles[i].position, obstacles[i].size);
         if (CheckCollisionBoxes(playerBox, obsBox)) {
-            if (obsBox.max.y - playerBox.min.y < STEP_HEIGHT) { // The same as above, but on the Z axis.
+            if (obsBox.max.y - playerBox.min.y <
+                STEP_HEIGHT) { // The same as above, but on the Z axis.
                 body->position.y = obsBox.max.y += 0.01f;
                 body->velocity.y = 0.0f;
             }
