@@ -153,7 +153,7 @@ int main(void) {
     // Preload Boom Gif
     boomAnim.framesCount = 0;
     boomAnim.Sprite = LoadImageAnim("resources/sprites/boom.gif", &boomAnim.framesCount);
-    boomAnim.frameDelay = 2;
+    boomAnim.frameDelay = 8;
     boomAnimTexture = LoadTextureFromImage(boomAnim.Sprite);
 
     // Initialize player Variables
