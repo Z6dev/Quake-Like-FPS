@@ -153,7 +153,7 @@ int main(void) {
     // Preload Boom Gif
     boomAnim.framesCount = 0;
     boomAnim.Sprite = LoadImageAnim("resources/sprites/boom.gif", &boomAnim.framesCount);
-    boomAnim.frameDelay = 8;
+    boomAnim.frameDelay = 6;
     boomAnimTexture = LoadTextureFromImage(boomAnim.Sprite);
 
     // Initialize player Variables
@@ -424,7 +424,7 @@ void DrawMaurices() {
 
                 maurices[i].nextFrameDataOffset = boomAnim.Sprite.width*boomAnim.Sprite.height*4*maurices[i].currentFrame;
 
-                UpdateTexture(boomAnimTexture, ((unsigned char*)boomAnim.Sprite.data) + maurices[i].nextFrameDataOffset);
+                UpdateTexture(boomAnimTexture, ((unsigned int*)boomAnim.Sprite.data) + maurices[i].nextFrameDataOffset);
 
                 maurices[i].frameTimer = 0;
             }
