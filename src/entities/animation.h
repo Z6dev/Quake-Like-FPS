@@ -6,7 +6,7 @@
 typedef struct {
     Image Sprite;
     int framesCount;
-    float frameDelay;
+    int frameDelay;
 } AnimatedSprite;
 
 #endif

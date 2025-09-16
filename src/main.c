@@ -55,7 +55,9 @@ typedef struct {
     bool exploding;
 
     int currentFrame;
-    int frameTime;
+    int frameTimer;
+
+    unsigned int nextFrameDataOffset;
 } Maurice;
 
 static Maurice maurices[MAX_MAURICES];
@@ -95,7 +97,7 @@ void Update_Maurice(Player* player, Maurice* murice, Sound* fxDeath) {
         murice->alive = false;
         murice->exploding = true;
         murice->currentFrame = 0;
-        murice->frameTime = 0.0f;
+        murice->frameTimer = 0;
     }
 }
 
@@ -149,9 +151,9 @@ int main(void) {
     fxBoom = LoadSound("resources/sfx/boom.mp3");
 
     // Preload Boom Gif
-    boomAnim.framesCount = 17;
-    boomAnim.Sprite = LoadImage("resources/sprites/boom.png");
-    boomAnim.frameDelay = 0.4f;
+    boomAnim.framesCount = 0;
+    boomAnim.Sprite = LoadImageAnim("resources/sprites/boom.gif", &boomAnim.framesCount);
+    boomAnim.frameDelay = 2;
     boomAnimTexture = LoadTextureFromImage(boomAnim.Sprite);
 
     // Initialize player Variables
@@ -182,10 +184,10 @@ int main(void) {
             (Vector3){2.0f, 3.0f, 2.0f}};
         maurices[i].direction = (Vector3){0, 0, 0};
         maurices[i].alive = true;
-        maurices[i].health = 50;
+        maurices[i].health = 5;
 
         maurices[i].exploding = false;
-        maurices[i].frameTime = 0.0f;
+        maurices[i].frameTimer = 0;
         maurices[i].currentFrame = 0;
     }
 
@@ -411,20 +413,20 @@ void DrawMaurices() {
         }
 
         if (maurices[i].exploding) {
-            Rectangle src = {
-                ((float)boomAnimTexture.width / boomAnim.framesCount) * (maurices[i].currentFrame),
-                0.0f, (float)boomAnimTexture.width / boomAnim.framesCount, boomAnimTexture.height};
-
-            DrawBillboardRec(camera, boomAnimTexture, src, maurices[i].obstacle.position,
-                             (Vector2){5.0f, 5.0f}, WHITE);
+            DrawBillboard(camera, boomAnimTexture, MuriceDrawPos, 4.0f, WHITE);
             
-            maurices[i].frameTime = (float)GetTime();
-            if (maurices[i].frameTime >= boomAnim.frameDelay) {
+            maurices[i].frameTimer++;
+            if (maurices[i].frameTimer >= boomAnim.frameDelay) {
                 maurices[i].currentFrame++;
 
-                if (maurices[i].currentFrame >= boomAnim.framesCount) {
+                if (maurices[i].currentFrame >= boomAnim.framesCount)
                     maurices[i].exploding = false;
-                }
+
+                maurices[i].nextFrameDataOffset = boomAnim.Sprite.width*boomAnim.Sprite.height*4*maurices[i].currentFrame;
+
+                UpdateTexture(boomAnimTexture, ((unsigned char*)boomAnim.Sprite.data) + maurices[i].nextFrameDataOffset);
+
+                maurices[i].frameTimer = 0;
             }
         }
     }
