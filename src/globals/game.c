@@ -45,13 +45,6 @@ void GameLoop(void) {
     static double lastShotTime;
     static float walkTimer;
 
-    // Add for ray fade effect
-    static float rayFadeTimer = 0.0f;
-    const float rayFadeDuration = 0.2f; // seconds
-
-    Ray gunRay;
-    RayCollision gunRayCollision;
-
     float dt = GetFrameTime();
     walkTimer += dt;
 
@@ -71,8 +64,8 @@ void GameLoop(void) {
     Vector3 camForwardDir = Vector3Normalize(Vector3Subtract(camera.target, camera.position));
 
     if (IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
-        /*
         int activePlayerBullets = 0;
+
         for (int i = 0; i < MAX_PLAYER_BULLETS; i++) {
             if (playerBullets[i].active) {
                 activePlayerBullets++;
@@ -87,34 +80,12 @@ void GameLoop(void) {
             bullet_spawn(playerBullets, MAX_PLAYER_BULLETS, player.body.position, camForwardDir,
                          100, 0.35f, 2.0f);
             lastShotTime = GetTime();
-        }*/
-
-        if (GetTime() - lastShotTime >= firerate) {
-            gunRay = (Ray){camera.position, camForwardDir};
-
-            SetSoundPitch(fxShoot, 1.0f + (GetRandomValue(-100, 100) * 0.001));
-            PlaySound(fxShoot);
-
-            rayFadeTimer = rayFadeDuration; // Start fading the ray
-            lastShotTime = GetTime();
-
-            for (int i = 0; i < MAX_MAURICES; i++) {
-                gunRayCollision = GetRayCollisionBox(
-                    gunRay, GetBoundingBox(maurices[i].enemy.position, maurices[i].enemy.size));
-
-                if (gunRayCollision.hit) {
-                    maurices[i].enemy.health -= 5;
-                    break;
-                }
-            }
-
         }
     }
 
     bullet_update(playerBullets, MAX_PLAYER_BULLETS, obstacles, MAX_OBSTACLES);
     bullet_update(enemyBullets, MAX_ENEMY_BULLETS, obstacles, MAX_OBSTACLES);
 
-    /*
     for (int i = 0; i < MAX_PLAYER_BULLETS; i++) {
         if (!playerBullets[i].active)
             continue;
@@ -130,7 +101,6 @@ void GameLoop(void) {
             }
         }
     }
-    */
 
     // Update Player
     //----------------------------------------------------------------------------------
@@ -230,18 +200,6 @@ void GameLoop(void) {
         DrawSphereWires(playerBullets[i].Pos, playerBullets[i].size + 0.1f, 6, 6, DARKBLUE);
     }
 
-    // Draw Gun Ray with fade effect
-    if (rayFadeTimer > 0.0f) {
-        float alpha = rayFadeTimer / rayFadeDuration;
-        Color fadedCyan = Fade((Color){150, 255, 255, 255}, alpha);
-        DrawLine3D((Vector3){player.body.position.x, player.body.position.y + 1.0f,
-                             player.body.position.z},
-                   Vector3Add(player.body.position, Vector3Scale(camForwardDir, 100)), fadedCyan);
-        rayFadeTimer -= dt;
-        if (rayFadeTimer < 0.0f)
-            rayFadeTimer = 0.0f;
-    }
-
     DrawLevel();
     EndMode3D();
 
@@ -327,7 +285,7 @@ void DrawMaurices(void) {
                                                              boomAnim.Sprite.height * 4 *
                                                              maurices[i].animPlayer.currentFrame;
 
-                UpdateTexture(boomAnimTexture, ((unsigned int*)boomAnim.Sprite.data) +
+                UpdateTexture(boomAnimTexture, ((unsigned char*)boomAnim.Sprite.data) +
                                                    maurices[i].animPlayer.nextFrameDataOffset);
 
                 maurices[i].animPlayer.frameTimer = 0;

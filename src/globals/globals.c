@@ -16,7 +16,7 @@ Obstacle obstacles[MAX_OBSTACLES];
 
 bool GameInitialized = false;
 
-float firerate = 0.49f;
+float firerate = 0.15f;
 
 Vector2 sensitivity = {0.005f, 0.005f};
 

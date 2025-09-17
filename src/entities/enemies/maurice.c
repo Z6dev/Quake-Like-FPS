@@ -3,6 +3,7 @@
 #include "../bullet.h"
 #include <raylib.h>
 #include <raymath.h>
+#include <stdlib.h>
 
 // Actual Functions
 void Update_Maurice(Player* player, Maurice* murice, Bullet* enemyBullets, int bulletArr_size,
@@ -28,7 +29,7 @@ void Update_Maurice(Player* player, Maurice* murice, Bullet* enemyBullets, int b
     }
 
     float stopDistance = 4.0f; // how close he should get before stopping
-    float speed = 0.05f;       // how fast Maurice moves
+    float speed = ((float)rand()/(float)(RAND_MAX)) * 0.08f;       // how fast Maurice moves
 
     if (distance > stopDistance) {
         // Move Maurice toward player
