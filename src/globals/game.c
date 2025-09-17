@@ -45,6 +45,13 @@ void GameLoop(void) {
     static double lastShotTime;
     static float walkTimer;
 
+    // Add for ray fade effect
+    static float rayFadeTimer = 0.0f;
+    const float rayFadeDuration = 0.2f; // seconds
+
+    Ray gunRay;
+    RayCollision gunRayCollision;
+
     float dt = GetFrameTime();
     walkTimer += dt;
 
@@ -56,13 +63,15 @@ void GameLoop(void) {
         equippedWeapon = PLASMAGUN;
         break;
     case KEY_TWO:
-        equippedWeapon = KETTLEPULT;
+        equippedWeapon = TEASPRAY;
         break;
     }
     //----------------------------------------------------------------------------------
     // Handle Bullet Shooting
+    Vector3 camForwardDir = Vector3Normalize(Vector3Subtract(camera.target, camera.position));
 
     if (IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
+        /*
         int activePlayerBullets = 0;
         for (int i = 0; i < MAX_PLAYER_BULLETS; i++) {
             if (playerBullets[i].active) {
@@ -71,8 +80,6 @@ void GameLoop(void) {
         }
 
         if (GetTime() - lastShotTime >= firerate && activePlayerBullets < MAX_PLAYER_BULLETS) {
-            Vector3 camForwardDir =
-                Vector3Normalize(Vector3Subtract(camera.target, camera.position));
 
             SetSoundPitch(fxShoot, 1.0f + (GetRandomValue(-100, 100) * 0.001));
             PlaySound(fxShoot);
@@ -80,11 +87,34 @@ void GameLoop(void) {
             bullet_spawn(playerBullets, MAX_PLAYER_BULLETS, player.body.position, camForwardDir,
                          100, 0.35f, 2.0f);
             lastShotTime = GetTime();
+        }*/
+
+        if (GetTime() - lastShotTime >= firerate) {
+            gunRay = (Ray){camera.position, camForwardDir};
+
+            SetSoundPitch(fxShoot, 1.0f + (GetRandomValue(-100, 100) * 0.001));
+            PlaySound(fxShoot);
+
+            rayFadeTimer = rayFadeDuration; // Start fading the ray
+            lastShotTime = GetTime();
+
+            for (int i = 0; i < MAX_MAURICES; i++) {
+                gunRayCollision = GetRayCollisionBox(
+                    gunRay, GetBoundingBox(maurices[i].enemy.position, maurices[i].enemy.size));
+
+                if (gunRayCollision.hit) {
+                    maurices[i].enemy.health -= 5;
+                    break;
+                }
+            }
+
         }
     }
 
     bullet_update(playerBullets, MAX_PLAYER_BULLETS, obstacles, MAX_OBSTACLES);
+    bullet_update(enemyBullets, MAX_ENEMY_BULLETS, obstacles, MAX_OBSTACLES);
 
+    /*
     for (int i = 0; i < MAX_PLAYER_BULLETS; i++) {
         if (!playerBullets[i].active)
             continue;
@@ -100,6 +130,7 @@ void GameLoop(void) {
             }
         }
     }
+    */
 
     // Update Player
     //----------------------------------------------------------------------------------
@@ -199,6 +230,18 @@ void GameLoop(void) {
         DrawSphereWires(playerBullets[i].Pos, playerBullets[i].size + 0.1f, 6, 6, DARKBLUE);
     }
 
+    // Draw Gun Ray with fade effect
+    if (rayFadeTimer > 0.0f) {
+        float alpha = rayFadeTimer / rayFadeDuration;
+        Color fadedCyan = Fade((Color){150, 255, 255, 255}, alpha);
+        DrawLine3D((Vector3){player.body.position.x, player.body.position.y + 1.0f,
+                             player.body.position.z},
+                   Vector3Add(player.body.position, Vector3Scale(camForwardDir, 100)), fadedCyan);
+        rayFadeTimer -= dt;
+        if (rayFadeTimer < 0.0f)
+            rayFadeTimer = 0.0f;
+    }
+
     DrawLevel();
     EndMode3D();
 
@@ -266,20 +309,8 @@ void DrawMaurices(void) {
                       maurices[i].enemy.position.z};
 
         if (maurices[i].enemy.alive) {
-            Vector3 dir = maurices[i].enemy.direction;
-            float yaw = atan2f(dir.x, dir.z) * RAD2DEG;
-            float pitch = -atan2f(dir.y, sqrtf(dir.x * dir.x + dir.z * dir.z)) * RAD2DEG;
-
-            rlPushMatrix();
-            rlTranslatef(MuriceDrawPos.x, MuriceDrawPos.y, MuriceDrawPos.z);
-
-            rlRotatef(yaw, 0.0f, 1.0f, 0.0f);
-            rlRotatef(pitch, 1.0f, 0.0f, 0.0f);
-
-            DrawCubeV(Vector3Zero(), maurices[i].enemy.size,
-                      maurices[i].enemy.enraged ? RED : GRAY);
-            DrawCubeWiresV(Vector3Zero(), maurices[i].enemy.size, RAYWHITE);
-            rlPopMatrix();
+            DrawBillboard(camera, teapotTexture, MuriceDrawPos, 3.0f,
+                          maurices[i].enemy.enraged ? RED : WHITE);
         }
 
         if (maurices[i].exploding) {

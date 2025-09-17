@@ -35,7 +35,7 @@ typedef struct {
     float headTimer, walkLerp, headLerp;
     Vector2 lean;
 
-    short int health;
+    int health;
 } Player;
 
 // Obstacle Structure

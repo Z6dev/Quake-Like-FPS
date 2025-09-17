@@ -92,7 +92,7 @@ void Init_Maurice(Maurice* maurices) {
     for (int i = 0; i < MAX_MAURICES; i++) {
         maurices[i].enemy = (BaseEnemy){
             (Vector3){GetRandomValue(-25, 10), GetRandomValue(3, 15), GetRandomValue(-25, 10)},
-            (Vector3){2.0f, 3.0f, 2.0f}};
+            (Vector3){3.0f, 2.0f, 3.0f}};
         maurices[i].enemy.direction = (Vector3){0, 0, 0};
         maurices[i].enemy.alive = true;
         maurices[i].enemy.health = 30;

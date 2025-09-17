@@ -16,7 +16,7 @@ Obstacle obstacles[MAX_OBSTACLES];
 
 bool GameInitialized = false;
 
-float firerate = 0.1f;
+float firerate = 0.49f;
 
 Vector2 sensitivity = {0.005f, 0.005f};
 
@@ -32,3 +32,5 @@ Sound fxLaser;
 
 AnimatedSprite boomAnim;
 Texture2D boomAnimTexture;
+
+Texture2D teapotTexture;

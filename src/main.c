@@ -11,9 +11,9 @@
 #include "globals/globals.h"
 #include "globals/game.h"
 
-//----------------------------------------------------------------------------------
-// Obstacles
-//----------------------------------------------------------------------------------
+void MainLoop() {
+    GameLoop();
+}
 
 //------------------------------------------------------------------------------------
 // Program main entry point
@@ -32,8 +32,9 @@ int main(void) {
     fxWalk = LoadSound("resources/sfx/walk.mp3");
     fxJump = LoadSound("resources/sfx/ha.mp3");
     fxBoom = LoadSound("resources/sfx/boom.mp3");
-
     fxLaser = LoadSound("resources/sfx/lasershoot.mp3");
+
+    teapotTexture = LoadTexture("resources/sprites/teapot.png");
 
     // Preload Boom Gif
     boomAnim.framesCount = 0;
@@ -65,7 +66,7 @@ int main(void) {
     //--------------------------------------------------------------------------------------
 
 #ifdef __EMSCRIPTEN_major__
-    emscripten_set_main_loop(GameLoop, 60, 1);
+    emscripten_set_main_loop(MainLoop, 60, 1);
 #else
     while (!WindowShouldClose()) {
         GameLoop();
@@ -80,7 +81,9 @@ int main(void) {
     UnloadSound(fxWalk);
     unloadSound(fxBoom);
     unloadSound(fxLaser);
-    UnloadTexture(boomGifTexture); // <-- Unload texture at exit
+
+    UnloadTexture(boomGifTexture);
+    UnloadTexture();
 #endif
     CloseAudioDevice(); // Close Audio Device
     CloseWindow();      // Close window and OpenGL context

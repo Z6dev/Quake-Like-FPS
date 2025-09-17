@@ -41,7 +41,7 @@ static Maurice maurices[MAX_MAURICES];
 // Weapons
 //----------------------------------------------------------------------------------
 
-enum Weapon { PLASMAGUN, KETTLEPULT };
+enum Weapon { PLASMAGUN, TEASPRAY };
 extern enum Weapon equippedWeapon;
 
 //----------------------------------------------------------------------------------
@@ -63,12 +63,13 @@ extern Sound fxShoot;
 extern Sound fxWalk;
 extern Sound fxJump;
 extern Sound fxBoom;
-
 extern Sound fxLaser;
 
 
 extern AnimatedSprite boomAnim;
 extern Texture2D boomAnimTexture;
+
+extern Texture2D teapotTexture;
 
 //----------------------------------------------------------------------------------
 // Module Functions Declaration
