@@ -1,4 +1,5 @@
 #include "globals.h"
+#include "raylib.h"
 
 // Weapons
 
@@ -6,6 +7,8 @@ enum Weapon equippedWeapon;
 
 int screenWidth = 800;
 int screenHeight = 450;
+
+Obstacle obstacles[MAX_OBSTACLES];
 
 //----------------------------------------------------------------------------------
 // Global Variables Definition
@@ -24,6 +27,7 @@ Sound fxShoot;
 Sound fxWalk;
 Sound fxJump;
 Sound fxBoom;
+
 Sound fxLaser;
 
 AnimatedSprite boomAnim;

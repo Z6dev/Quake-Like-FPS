@@ -14,29 +14,23 @@
 #define MAX_MAURICES 5
 #define MAURICE_MAX_HEALTH 30
 
-#include "body.h"
-#include "bullet.h"
+#include "../animation.h"
+#include "../body.h"
+#include "../bullet.h"
+#include "enemy.h"
 
 typedef struct {
-    Obstacle obstacle;
-    Vector3 direction;
-    short int health;
+    BaseEnemy enemy;
 
-    bool alive;
     bool justDied;
     bool exploding;
-    bool enraged;
 
     float lastShotTime;
     float firerate;
-    float cooldown;
-    float lastAttackTime;
 
     int shotCount;
 
-    int currentFrame;
-    int frameTimer;
-    unsigned int nextFrameDataOffset;
+    AnimPlayer animPlayer;
 } Maurice;
 
 void Update_Maurice(Player* player, Maurice* murice, Bullet* enemybullet_arr, int bulletArr_size,

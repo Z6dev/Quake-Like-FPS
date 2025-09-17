@@ -9,4 +9,10 @@ typedef struct {
     int frameDelay;
 } AnimatedSprite;
 
+typedef struct {
+    int currentFrame;
+    int frameTimer;
+    unsigned int nextFrameDataOffset;
+} AnimPlayer;
+
 #endif
