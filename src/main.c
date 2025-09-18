@@ -2,7 +2,7 @@
 #include "raylib.h"
 
 #define RAYGUI_IMPLEMENTATION
-#include "raygui.h"
+#include "utils/raygui.h"
 
 #include "entities/animation.h"
 #include "entities/body.h"

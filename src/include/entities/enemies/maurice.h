@@ -34,7 +34,7 @@ typedef struct {
 } Maurice;
 
 void Update_Maurice(Player* player, Maurice* murice, Bullet* enemybullet_arr, int bulletArr_size,
-                    Obstacle* obstacles, int obstacleArr_size, Sound* fxShoot);
+                    Sound* fxShoot);
 void Init_Maurice(Maurice* maurice);
 
 #endif

@@ -7,9 +7,7 @@
 
 // Actual Functions
 void Update_Maurice(Player* player, Maurice* murice, Bullet* enemyBullets, int bulletArr_size,
-                    Obstacle* obstacles, int obstacleArr_size, Sound* fxShoot) {
-
-    bullet_update(enemyBullets, bulletArr_size, obstacles, obstacleArr_size);
+                    Sound* fxShoot) {
 
     if (!murice->enemy.alive)
         return;
@@ -29,7 +27,7 @@ void Update_Maurice(Player* player, Maurice* murice, Bullet* enemyBullets, int b
     }
 
     float stopDistance = 4.0f; // how close he should get before stopping
-    float speed = ((float)rand()/(float)(RAND_MAX)) * 0.08f;       // how fast Maurice moves
+    float speed = ((float)rand() / (float)(RAND_MAX)) * 0.08f; // how fast Maurice moves
 
     if (distance > stopDistance) {
         // Move Maurice toward player

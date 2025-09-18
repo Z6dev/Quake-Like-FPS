@@ -20,7 +20,7 @@ void bullet_spawn(Bullet* bullets, int maxBullets, Vector3 StartPos, Vector3 Dir
 
     for (int i = 0; i < maxBullets; i++) {
         if (!bullets[i].active) {
-            bullets[i].Pos = StartPos;
+            bullets[i].position = StartPos;
             bullets[i].Vel = Vector3Multiply(Dir, (Vector3){speed, speed, speed});
             bullets[i].life = life;
             bullets[i].active = true;
@@ -36,14 +36,14 @@ void bullet_update(Bullet* bullets, int maxBullets, Obstacle* obstacles, int max
 
     for (int i = 0; i < maxBullets; i++) {
         if (bullets[i].active) {
-            bullets[i].Pos = Vector3Add(bullets[i].Pos, Vector3Scale(bullets[i].Vel, deltaTime));
+            bullets[i].position = Vector3Add(bullets[i].position, Vector3Scale(bullets[i].Vel, deltaTime));
 
             for (int j = 0; j < maxObstacles; j++) {
                 if (obstacles == 0 || maxObstacles == 0)
                     break;
                 BoundingBox obstacleBox = GetBoundingBox(obstacles[j].position, obstacles[j].size);
 
-                if (CheckCollisionBoxSphere(obstacleBox, bullets[i].Pos, bullets[i].size)) {
+                if (CheckCollisionBoxSphere(obstacleBox, bullets[i].position, bullets[i].size)) {
                     bullets[i].active = false;
                     break;
                 }

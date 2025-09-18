@@ -6,7 +6,7 @@
 
 // Bullet structure
 typedef struct {
-    Vector3 Pos;
+    Vector3 position;
     Vector3 Vel;
     float size;
     bool active;

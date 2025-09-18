@@ -10,6 +10,7 @@
 #include "../entities/camera_fps.h"
 #include "../entities/enemies/maurice.h"
 #include "globals.h"
+#include "utils/drawutils.h"
 
 //----------------------------------------------------------------------------------
 // Module Functions Definition
@@ -28,7 +29,7 @@ void GameLoop(void) {
 
         player.body.position = (Vector3){0.0f, 2.0f, 0.0f};
         player.health = 8;
-        
+
         GameInitialized = true;
     }
 
@@ -90,7 +91,8 @@ void GameLoop(void) {
                 GetBoundingBox(maurices[j].enemy.position, maurices[j].enemy.size);
 
             if (maurices[j].enemy.alive &&
-                CheckCollisionBoxSphere(MauriceBox, playerBullets[i].Pos, playerBullets[i].size)) {
+                CheckCollisionBoxSphere(MauriceBox, playerBullets[i].position,
+                                        playerBullets[i].size)) {
                 playerBullets[i].active = false;
                 maurices[j].enemy.health -= 1;
                 break; // Only one Maurice can be damaged per bullet
@@ -139,8 +141,7 @@ void GameLoop(void) {
     //----------------------------------------------------------------------------------
     // Update Maurices
     for (int i = 0; i < MAX_MAURICES; i++) {
-        Update_Maurice(&player, &maurices[i], enemyBullets, MAX_ENEMY_BULLETS, obstacles,
-                       MAX_OBSTACLES, &fxLaser);
+        Update_Maurice(&player, &maurices[i], enemyBullets, MAX_ENEMY_BULLETS, &fxLaser);
 
         if (maurices[i].justDied) {
             float distance = Vector3Distance(maurices[i].enemy.position, player.body.position);
@@ -183,7 +184,7 @@ void GameLoop(void) {
     //----------------------------------------------------------------------------------
     BeginDrawing();
 
-    ClearBackground((Color){30, 30, 30, 255});
+    ClearBackground(SKYBLUE);
 
     BeginMode3D(camera);
 
@@ -192,8 +193,8 @@ void GameLoop(void) {
             continue;
         }
 
-        DrawSphere(playerBullets[i].Pos, playerBullets[i].size, BLUE);
-        DrawSphereWires(playerBullets[i].Pos, playerBullets[i].size + 0.1f, 6, 6, DARKBLUE);
+        DrawSphere(playerBullets[i].position, playerBullets[i].size, BLUE);
+        DrawSphereWires(playerBullets[i].position, playerBullets[i].size + 0.1f, 6, 6, DARKBLUE);
     }
 
     DrawLevel();
@@ -218,7 +219,7 @@ void GameLoop(void) {
 void DrawLevel(void) {
     const int floorExtent = 25;
     const float tileSize = 5.0f;
-    const Color tileColor = {168, 0, 219, 255};
+    const Color tileColor = RAYWHITE;
 
     // Floor tiles
     for (int y = -floorExtent; y < floorExtent; y++) {
@@ -239,11 +240,12 @@ void DrawLevel(void) {
             (Vector3){obstacles[i].position.x, obstacles[i].position.y + obstacles[i].size.y / 2.0f,
                       obstacles[i].position.z};
 
-        DrawBoundingBox(GetBoundingBox(obstacles[i].position, obstacles[i].size), RED);
-        DrawCubeV(ObstacleDrawPos, obstacles[i].size, PURPLE);
-        DrawCubeWiresV(ObstacleDrawPos, obstacles[i].size, DARKPURPLE);
+        //DrawCubeV(ObstacleDrawPos, obstacles[i].size, PURPLE);
+        //DrawCubeWiresV(ObstacleDrawPos, obstacles[i].size, DARKPURPLE);
+        DrawCubeTexture(studTexture, ObstacleDrawPos, obstacles[i].size.x, obstacles[i].size.y, obstacles[i].size.z, PURPLE);
     }
 
+    // Draw Maurices here
     DrawMaurices();
 
     // Draw Player
@@ -290,7 +292,8 @@ void DrawMaurices(void) {
 
     for (int i = 0; i < MAX_ENEMY_BULLETS; i++) {
         if (enemyBullets[i].active) {
-            DrawSphere(enemyBullets[i].Pos, enemyBullets[i].size, ORANGE);
+            DrawSphere(enemyBullets[i].position, enemyBullets[i].size, ORANGE);
+            DrawSphereWires(enemyBullets[i].position, enemyBullets[i].size, 12, 12, RED);
         }
     }
 }
