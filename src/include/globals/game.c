@@ -11,14 +11,6 @@
 #include "../entities/enemies/maurice.h"
 #include "globals.h"
 
-void obstacles_init() {
-    obstacles[0] = (Obstacle){(Vector3){3.0f, 0.0f, 0.0f}, (Vector3){3.0f, 10.0f, 3.0f}};
-    obstacles[1] = (Obstacle){(Vector3){-3.0f, 0.0f, 0.0f}, (Vector3){3.0f, 10.0f, 3.0f}};
-
-    obstacles[2] = (Obstacle){(Vector3){3.0f, 0.0f, 3.0f}, (Vector3){8.0f, 0.5f, 3.0f}};
-    obstacles[3] = (Obstacle){(Vector3){3.0f, 0.5f, 3.0f}, (Vector3){5.0f, 0.5f, 3.0f}};
-}
-
 //----------------------------------------------------------------------------------
 // Module Functions Definition
 //----------------------------------------------------------------------------------
@@ -30,9 +22,13 @@ void GameLoop(void) {
     if (!GameInitialized) {
         bullet_init(playerBullets, MAX_PLAYER_BULLETS);
         bullet_init(enemyBullets, MAX_PLAYER_BULLETS);
-        obstacles_init();
+        obstacles_init(obstacles);
 
         Init_Maurice(maurices);
+
+        player.body.position = (Vector3){0.0f, 2.0f, 0.0f};
+        player.health = 8;
+        
         GameInitialized = true;
     }
 
@@ -53,10 +49,10 @@ void GameLoop(void) {
 
     switch (GetKeyPressed()) {
     case KEY_ONE:
-        equippedWeapon = PLASMAGUN;
+        equippedWeapon = WEAPON_PLASMAGUN;
         break;
     case KEY_TWO:
-        equippedWeapon = TEASPRAY;
+        equippedWeapon = WEAPON_TEASPRAY;
         break;
     }
     //----------------------------------------------------------------------------------
@@ -272,7 +268,11 @@ void DrawMaurices(void) {
         }
 
         if (maurices[i].exploding) {
-            DrawBillboard(camera, boomAnimTexture, MuriceDrawPos, 7.0f, WHITE);
+            Rectangle src = {boomAnimTexture.width * maurices[i].animPlayer.currentFrame, 0,
+                             (float)boomAnimTexture.width / boomAnim.framesCount,
+                             boomAnimTexture.height};
+            DrawBillboardRec(camera, boomAnimTexture, src, MuriceDrawPos, (Vector2){5.0f, 5.0f},
+                             WHITE);
 
             maurices[i].animPlayer.frameTimer++;
             if (maurices[i].animPlayer.frameTimer >= boomAnim.frameDelay) {
@@ -280,13 +280,6 @@ void DrawMaurices(void) {
 
                 if (maurices[i].animPlayer.currentFrame >= boomAnim.framesCount)
                     maurices[i].exploding = false;
-
-                maurices[i].animPlayer.nextFrameDataOffset = boomAnim.Sprite.width *
-                                                             boomAnim.Sprite.height * 4 *
-                                                             maurices[i].animPlayer.currentFrame;
-
-                UpdateTexture(boomAnimTexture, ((unsigned char*)boomAnim.Sprite.data) +
-                                                   maurices[i].animPlayer.nextFrameDataOffset);
 
                 maurices[i].animPlayer.frameTimer = 0;
             }

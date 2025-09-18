@@ -2,6 +2,16 @@
 #include "raylib.h"
 #include "raymath.h"
 
+
+// Init Obstacles
+void obstacles_init(Obstacle* obstacles) {
+    obstacles[0] = (Obstacle){(Vector3){3.0f, 0.0f, 0.0f}, (Vector3){3.0f, 10.0f, 3.0f}};
+    obstacles[1] = (Obstacle){(Vector3){-3.0f, 0.0f, 0.0f}, (Vector3){3.0f, 10.0f, 3.0f}};
+
+    obstacles[2] = (Obstacle){(Vector3){3.0f, 0.0f, 3.0f}, (Vector3){8.0f, 0.5f, 3.0f}};
+    obstacles[3] = (Obstacle){(Vector3){3.0f, 0.5f, 3.0f}, (Vector3){5.0f, 0.5f, 3.0f}};
+}
+
 // Update body considering current world state
 void UpdatePlayerBody(Body* body, float rot, char side, char forward, bool jumpPressed,
                       bool crouchHold, Obstacle* obstacles, int elem_num) {

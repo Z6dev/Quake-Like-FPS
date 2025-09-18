@@ -19,7 +19,6 @@
 #define MAX_OBSTACLES 5
 extern Obstacle obstacles[];
 
-
 //----------------------------------------------------------------------------------
 // Bullets
 //----------------------------------------------------------------------------------
@@ -30,7 +29,6 @@ static Bullet playerBullets[MAX_PLAYER_BULLETS];
 #define MAX_ENEMY_BULLETS 100
 static Bullet enemyBullets[MAX_ENEMY_BULLETS];
 
-
 //----------------------------------------------------------------------------------
 // Maurice Enemies
 //----------------------------------------------------------------------------------
@@ -38,11 +36,14 @@ static Bullet enemyBullets[MAX_ENEMY_BULLETS];
 static Maurice maurices[MAX_MAURICES];
 
 //----------------------------------------------------------------------------------
-// Weapons
+// Enums
 //----------------------------------------------------------------------------------
 
-enum Weapon { PLASMAGUN, TEASPRAY };
+enum Weapon { WEAPON_PLASMAGUN, WEAPON_TEASPRAY };
 extern enum Weapon equippedWeapon;
+
+enum PlayerState { SCENE_GAME, SCENE_MENU };
+extern enum PlayerState gameState;
 
 //----------------------------------------------------------------------------------
 // Global Variables Definition
@@ -65,17 +66,10 @@ extern Sound fxJump;
 extern Sound fxBoom;
 extern Sound fxLaser;
 
-
 extern AnimatedSprite boomAnim;
 extern Texture2D boomAnimTexture;
 
 extern Texture2D teapotTexture;
-
-//----------------------------------------------------------------------------------
-// Module Functions Declaration
-//----------------------------------------------------------------------------------
-void GameLoop(void);
-void DrawLevel(void);
-void DrawMaurices(void);
+extern Texture2D studTexture;
 
 #endif

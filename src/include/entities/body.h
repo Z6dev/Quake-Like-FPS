@@ -48,6 +48,5 @@ void UpdatePlayerBody(Body* body, float rot, char side, char forward, bool jumpP
                       bool crouchHold, Obstacle* obstacles, int elem_num);
 BoundingBox GetBoundingBox(Vector3 position, Vector3 size);
 
-// Player bounding box size: width=1.0f, height=2.0f, depth=1.0f
-
+void obstacles_init(Obstacle* obstacles);
 #endif

@@ -1,18 +1,93 @@
 #include "emscripten/emscripten.h"
 #include "raylib.h"
-#include "rlgl.h"
 
-#include <stdbool.h>
+#define RAYGUI_IMPLEMENTATION
+#include "raygui.h"
 
 #include "entities/animation.h"
 #include "entities/body.h"
 #include "entities/camera_fps.h"
 
-#include "globals/globals.h"
 #include "globals/game.h"
+#include "globals/globals.h"
+
+#include <math.h>
+
+//----------------------------------------------------------------------------------
+// Global Constants Definition
+//----------------------------------------------------------------------------------
+
+enum Weapon equippedWeapon = WEAPON_PLASMAGUN;
+enum PlayerState gameState = SCENE_MENU;
+
+int screenWidth = 800;
+int screenHeight = 450;
+
+Obstacle obstacles[MAX_OBSTACLES];
+
+//----------------------------------------------------------------------------------
+// Global Variables Definition
+//----------------------------------------------------------------------------------
+
+bool GameInitialized = false;
+
+float firerate = 0.15f;
+
+Vector2 sensitivity = {0.005f, 0.005f};
+
+Player player = {0};
+Camera3D camera = {0};
+
+Sound fxShoot;
+Sound fxWalk;
+Sound fxJump;
+Sound fxBoom;
+
+Sound fxLaser;
+
+AnimatedSprite boomAnim = {0};
+Texture2D boomAnimTexture;
+
+Texture2D teapotTexture;
+Texture2D studTexture;
+
+//----------------------------------------------------------------------------------
+// Functions
+//----------------------------------------------------------------------------------
 
 void MainLoop() {
-    GameLoop();
+    switch (gameState) {
+    case SCENE_GAME:
+        GameLoop();
+        break;
+
+    case SCENE_MENU:
+        MenuLoop();
+        break;
+    }
+}
+
+void MenuLoop() {
+    BeginDrawing();
+
+    for (int y = -screenHeight; y < screenHeight * 2; y += studTexture.height / 4) {
+        for (int x = 0; x < screenWidth; x += studTexture.width / 4) {
+            DrawTexturePro(studTexture, (Rectangle){0, 0, studTexture.width, studTexture.height},
+                           (Rectangle){x, sinf((float)GetTime()) * 100 + y,
+                                       studTexture.width / 4.0f, studTexture.height / 4.0f},
+                           (Vector2){0.0f, 0.0f}, 0.0f, WHITE);
+        }
+    }
+
+    int textWidth = MeasureText("EXERCITUS MAURIS", 48);
+    DrawText("EXERCITUS MAURIS", screenWidth / 2 - textWidth / 2, 100, 48, WHITE);
+
+    if (GuiButton((Rectangle){screenWidth/2.0f - 110.0f, 200.0f, 220.0f, 80.0f}, "New Game")) {
+        GameInitialized = false;
+        gameState = SCENE_GAME;
+    }
+
+    EndDrawing();
 }
 
 //------------------------------------------------------------------------------------
@@ -26,6 +101,7 @@ int main(void) {
     InitAudioDevice();
     SetMasterVolume(1.5f);
 
+
     // Preload
     //---------------------------------------------------
     fxShoot = LoadSound("resources/sfx/chaingun.ogg");
@@ -35,11 +111,12 @@ int main(void) {
     fxLaser = LoadSound("resources/sfx/lasershoot.mp3");
 
     teapotTexture = LoadTexture("resources/sprites/teapot.png");
+    studTexture = LoadTexture("resources/sprites/stud.png");
 
     // Preload Boom Gif
-    boomAnim.framesCount = 0;
-    boomAnim.Sprite = LoadImageAnim("resources/sprites/boom.gif", &boomAnim.framesCount);
-    boomAnim.frameDelay = 6;
+    boomAnim.framesCount = 5;
+    boomAnim.Sprite = LoadImage("resources/sprites/boom.png");
+    boomAnim.frameDelay = 12;
     boomAnimTexture = LoadTextureFromImage(boomAnim.Sprite);
 
     // Initialize player Variables
@@ -50,6 +127,7 @@ int main(void) {
     player.walkLerp = 0.0f;
     player.headLerp = STAND_HEIGHT;
     player.lean = (Vector2){0};
+    player.health = 8;
 
     // Initialize camera variables
     // NOTE: UpdateCameraFPS() takes care of the rest
@@ -69,7 +147,7 @@ int main(void) {
     emscripten_set_main_loop(MainLoop, 60, 1);
 #else
     while (!WindowShouldClose()) {
-        GameLoop();
+        MainLoop();
     }
 #endif
 
