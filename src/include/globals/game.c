@@ -2,7 +2,6 @@
 #include "raylib.h"
 #include "raymath.h"
 #include "rlgl.h"
-#include <stdio.h>
 
 #include "../entities/animation.h"
 #include "../entities/body.h"
@@ -26,13 +25,15 @@ void GameLoop(void) {
     // Handle Pausing toggle (press ESC to toggle pause)
     //---------------------------------------------------
     if (IsKeyPressed(KEY_GRAVE)) {
-        GamePaused = !GamePaused;
+        if (GameScene == SCENE_GAME) {
+            GameScene = SCENE_PAUSE;
+        } else {
+            GameScene = SCENE_GAME;
+        }
 
-        if (GamePaused) {
+        if (GameScene == SCENE_PAUSE) {
             // Show OS cursor so user can interact with pause UI
             EnableCursor();
-            // Stop walking SFX (and any other continuous movement sounds)
-            StopSound(fxWalk);
         } else {
             // Hide cursor when resuming so mouse look works as before
             DisableCursor();
@@ -55,16 +56,22 @@ void GameLoop(void) {
     }
 
     // If paused, draw the pause overlay and skip game updates
-    if (GamePaused) {
+    if (GameScene == SCENE_PAUSE) {
         BeginDrawing();
-        // Dim background and draw pause text
         ClearBackground((Color){20, 20, 20, 255});
         DrawText("GAME PAUSED", screenWidth / 2 - MeasureText("GAME PAUSED", 40) / 2,
                  screenHeight / 2 - 80, 40, RAYWHITE);
 
         if (GuiButton((Rectangle){screenWidth / 2.0f - 110, 250, 220, 70},
                       GuiIconText(ICON_PLAYER_PLAY, "CONTINUE GAME"))) {
-            GamePaused = false;
+            GameScene = SCENE_GAME;
+        }
+
+        if (GuiButton((Rectangle){screenWidth / 2.0f - 110, 330, 220, 70},
+                      GuiIconText(ICON_RESTART, "GO TO MENU"))) {
+            
+            GameInitialized = false;
+            GameScene = SCENE_MENU;
         }
 
         DrawFPS(screenWidth - 100, 0);
@@ -230,7 +237,8 @@ void GameLoop(void) {
     BeginMode3D(camera);
 
     for (int i = 0; i < MAX_PLAYER_BULLETS; i++) {
-        if (!playerBullets[i].active == true) {
+        if (!playerBullets[i].active == true ||
+            Vector3Distance(playerBullets[i].position, player.body.position) > FAR_CULL_DISTANCE) {
             continue;
         }
 
@@ -243,11 +251,6 @@ void GameLoop(void) {
 
     // Draw Debug Info
     DrawFPS(screenWidth - 100, 0);
-
-    // Equipped weapons debug info
-    char WeaponBuf[18];
-    snprintf(WeaponBuf, 18, "Equipped: %d", equippedWeapon);
-    DrawText(WeaponBuf, 0, 0, 23, DARKGREEN);
 
     // Draw Crosshair
     DrawCircleLines(screenWidth / 2, (screenHeight / 2) + 5, 5, DARKGRAY);
@@ -290,7 +293,8 @@ void DrawLevel(void) {
             continue;
         }
 
-        DrawCubeTexture(studTexture, ObstacleDrawPos, obstacles[i].size.x, obstacles[i].size.y, obstacles[i].size.z, PURPLE);
+        DrawCubeTexture(studTexture, ObstacleDrawPos, obstacles[i].size.x, obstacles[i].size.y,
+                        obstacles[i].size.z, PURPLE);
     }
 
     // Draw Maurices here

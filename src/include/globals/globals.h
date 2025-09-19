@@ -44,8 +44,8 @@ static Maurice maurices[MAX_MAURICES];
 enum Weapon { WEAPON_PLASMAGUN, WEAPON_TEASPRAY };
 extern enum Weapon equippedWeapon;
 
-enum PlayerState { SCENE_GAME, SCENE_MENU };
-extern enum PlayerState gameState;
+enum PlayerState { SCENE_GAME, SCENE_MENU, SCENE_PAUSE };
+extern enum PlayerState GameScene;
 
 //----------------------------------------------------------------------------------
 // Global Variables Definition
@@ -54,7 +54,6 @@ extern int screenWidth;
 extern int screenHeight;
 
 extern bool GameInitialized;
-extern bool GamePaused;
 
 extern float firerate;
 

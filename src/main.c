@@ -18,7 +18,7 @@
 //----------------------------------------------------------------------------------
 
 enum Weapon equippedWeapon = WEAPON_PLASMAGUN;
-enum PlayerState gameState = SCENE_MENU;
+enum PlayerState GameScene = SCENE_MENU;
 
 int screenWidth = 800;
 int screenHeight = 450;
@@ -30,7 +30,6 @@ Obstacle obstacles[MAX_OBSTACLES];
 //----------------------------------------------------------------------------------
 
 bool GameInitialized = false;
-bool GamePaused = false;
 
 float firerate = 0.15f;
 
@@ -52,19 +51,22 @@ Texture2D boomAnimTexture;
 Texture2D teapotTexture;
 Texture2D studTexture;
 
-Shader shader;
 //----------------------------------------------------------------------------------
 // Functions
 //----------------------------------------------------------------------------------
 
 void MainLoop() {
-    switch (gameState) {
+    switch (GameScene) {
     case SCENE_GAME:
         GameLoop();
         break;
 
     case SCENE_MENU:
         MenuLoop();
+        break;
+
+    case SCENE_PAUSE:
+        GameLoop();
         break;
     }
 }
@@ -90,7 +92,7 @@ void MenuLoop() {
 
     if (GuiButton((Rectangle){screenWidth / 2.0f - 110.0f, 200.0f, 220.0f, 80.0f}, "New Game")) {
         GameInitialized = false;
-        gameState = SCENE_GAME;
+        GameScene = SCENE_GAME;
     }
 
     EndDrawing();
