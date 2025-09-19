@@ -10,7 +10,12 @@
 #include "../entities/camera_fps.h"
 #include "../entities/enemies/maurice.h"
 #include "globals.h"
+
+#include "utils/Frustum.h"
 #include "utils/drawutils.h"
+#include "utils/raygui.h"
+
+Frustum* CameraFrustum = {0};
 
 //----------------------------------------------------------------------------------
 // Module Functions Definition
@@ -18,6 +23,22 @@
 
 // Main Game Loop
 void GameLoop(void) {
+    // Handle Pausing toggle (press ESC to toggle pause)
+    //---------------------------------------------------
+    if (IsKeyPressed(KEY_GRAVE)) {
+        GamePaused = !GamePaused;
+
+        if (GamePaused) {
+            // Show OS cursor so user can interact with pause UI
+            EnableCursor();
+            // Stop walking SFX (and any other continuous movement sounds)
+            StopSound(fxWalk);
+        } else {
+            // Hide cursor when resuming so mouse look works as before
+            DisableCursor();
+        }
+    }
+
     // Inits
     //---------------------------------------------------
     if (!GameInitialized) {
@@ -31,6 +52,24 @@ void GameLoop(void) {
         player.health = 8;
 
         GameInitialized = true;
+    }
+
+    // If paused, draw the pause overlay and skip game updates
+    if (GamePaused) {
+        BeginDrawing();
+        // Dim background and draw pause text
+        ClearBackground((Color){20, 20, 20, 255});
+        DrawText("GAME PAUSED", screenWidth / 2 - MeasureText("GAME PAUSED", 40) / 2,
+                 screenHeight / 2 - 80, 40, RAYWHITE);
+
+        if (GuiButton((Rectangle){screenWidth / 2.0f - 110, 250, 220, 70},
+                      GuiIconText(ICON_PLAYER_PLAY, "CONTINUE GAME"))) {
+            GamePaused = false;
+        }
+
+        DrawFPS(screenWidth - 100, 0);
+        EndDrawing();
+        return;
     }
 
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
@@ -182,6 +221,8 @@ void GameLoop(void) {
 
     // Draw
     //----------------------------------------------------------------------------------
+    ExtractFrustum(CameraFrustum);
+
     BeginDrawing();
 
     ClearBackground(SKYBLUE);
@@ -240,8 +281,15 @@ void DrawLevel(void) {
             (Vector3){obstacles[i].position.x, obstacles[i].position.y + obstacles[i].size.y / 2.0f,
                       obstacles[i].position.z};
 
-        //DrawCubeV(ObstacleDrawPos, obstacles[i].size, PURPLE);
-        //DrawCubeWiresV(ObstacleDrawPos, obstacles[i].size, DARKPURPLE);
+        float ObstaclePlayerDistance = Vector3Distance(obstacles[i].position, player.body.position);
+        bool ObstacleInScreen =
+            AABBoxInFrustum(CameraFrustum, obstacles[i].position,
+                            Vector3Add(obstacles[i].position, obstacles[i].size));
+
+        if (ObstaclePlayerDistance > FAR_CULL_DISTANCE || !ObstacleInScreen) {
+            continue;
+        }
+
         DrawCubeTexture(studTexture, ObstacleDrawPos, obstacles[i].size.x, obstacles[i].size.y, obstacles[i].size.z, PURPLE);
     }
 
@@ -264,6 +312,14 @@ void DrawMaurices(void) {
                       maurices[i].enemy.position.y + maurices[i].enemy.size.y / 2.0f,
                       maurices[i].enemy.position.z};
 
+        float MuricePlayerDistance =
+            Vector3Distance(maurices[i].enemy.position, player.body.position);
+
+        if (MuricePlayerDistance > FAR_CULL_DISTANCE ||
+            !AABBoxInFrustum(CameraFrustum, maurices[i].enemy.position,
+                             Vector3Add(maurices[i].enemy.position, maurices[i].enemy.size)))
+            return;
+
         if (maurices[i].enemy.alive) {
             DrawBillboard(camera, teapotTexture, MuriceDrawPos, 3.0f,
                           maurices[i].enemy.enraged ? RED : WHITE);
@@ -273,6 +329,7 @@ void DrawMaurices(void) {
             Rectangle src = {boomAnimTexture.width * maurices[i].animPlayer.currentFrame, 0,
                              (float)boomAnimTexture.width / boomAnim.framesCount,
                              boomAnimTexture.height};
+
             DrawBillboardRec(camera, boomAnimTexture, src, MuriceDrawPos, (Vector2){5.0f, 5.0f},
                              WHITE);
 
@@ -291,6 +348,12 @@ void DrawMaurices(void) {
     // Draw Maurice Bullets
 
     for (int i = 0; i < MAX_ENEMY_BULLETS; i++) {
+        float BulletPlayerDistance =
+            Vector3Distance(enemyBullets[i].position, player.body.position);
+
+        if (BulletPlayerDistance > FAR_CULL_DISTANCE)
+            continue;
+
         if (enemyBullets[i].active) {
             DrawSphere(enemyBullets[i].position, enemyBullets[i].size, ORANGE);
             DrawSphereWires(enemyBullets[i].position, enemyBullets[i].size, 12, 12, RED);

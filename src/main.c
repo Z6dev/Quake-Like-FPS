@@ -30,6 +30,7 @@ Obstacle obstacles[MAX_OBSTACLES];
 //----------------------------------------------------------------------------------
 
 bool GameInitialized = false;
+bool GamePaused = false;
 
 float firerate = 0.15f;
 
@@ -51,6 +52,7 @@ Texture2D boomAnimTexture;
 Texture2D teapotTexture;
 Texture2D studTexture;
 
+Shader shader;
 //----------------------------------------------------------------------------------
 // Functions
 //----------------------------------------------------------------------------------
@@ -70,19 +72,23 @@ void MainLoop() {
 void MenuLoop() {
     BeginDrawing();
 
+    float scrollSpeed = 150.f;
+    float offset = fmod((float)GetTime() * scrollSpeed, studTexture.height / 4.0f);
+
     for (int y = -screenHeight; y < screenHeight * 2; y += studTexture.height / 4) {
         for (int x = 0; x < screenWidth; x += studTexture.width / 4) {
-            DrawTexturePro(studTexture, (Rectangle){0, 0, studTexture.width, studTexture.height},
-                           (Rectangle){x, sinf((float)GetTime()) * 100 + y,
-                                       studTexture.width / 4.0f, studTexture.height / 4.0f},
-                           (Vector2){0.0f, 0.0f}, 0.0f, WHITE);
+            DrawTexturePro(
+                studTexture, (Rectangle){0, 0, studTexture.width, studTexture.height},
+                (Rectangle){x, y + offset, studTexture.width / 4.0f, studTexture.height / 4.0f},
+                (Vector2){0.0f, 0.0f}, 0.0f, WHITE);
         }
     }
 
     int textWidth = MeasureText("EXERCITUS MAURIS", 48);
-    DrawText("EXERCITUS MAURIS", screenWidth / 2 - textWidth / 2, 100, 48, WHITE);
+    DrawText("EXERCITUS MAURIS", screenWidth / 2 - textWidth / 2,
+             (sinf((float)GetTime()) * 20) + 100, 48, WHITE);
 
-    if (GuiButton((Rectangle){screenWidth/2.0f - 110.0f, 200.0f, 220.0f, 80.0f}, "New Game")) {
+    if (GuiButton((Rectangle){screenWidth / 2.0f - 110.0f, 200.0f, 220.0f, 80.0f}, "New Game")) {
         GameInitialized = false;
         gameState = SCENE_GAME;
     }
@@ -101,9 +107,8 @@ int main(void) {
     InitAudioDevice();
     SetMasterVolume(1.5f);
 
-
     // Preload
-    //---------------------------------------------------
+    //---------------------------------------------------------------------------------------
     fxShoot = LoadSound("resources/sfx/chaingun.ogg");
     fxWalk = LoadSound("resources/sfx/walk.mp3");
     fxJump = LoadSound("resources/sfx/ha.mp3");
@@ -113,6 +118,9 @@ int main(void) {
     teapotTexture = LoadTexture("resources/sprites/teapot.png");
     studTexture = LoadTexture("resources/sprites/stud.png");
 
+
+    // Extra Inits
+    //-------------------------------------------------------------------------------------------
     // Preload Boom Gif
     boomAnim.framesCount = 5;
     boomAnim.Sprite = LoadImage("resources/sprites/boom.png");

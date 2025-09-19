@@ -66,11 +66,11 @@ void Update_Maurice(Player* player, Maurice* murice, Bullet* enemyBullets, int b
         if ((float)GetTime() - murice->lastShotTime >= murice->firerate &&
             murice->shotCount <= maxShot) {
             bullet_spawn(enemyBullets, bulletArr_size, murice->enemy.position,
-                         murice->enemy.direction, murice->enemy.enraged ? 25.0f : 15.0f, 0.5f,
-                         10.0f);
+                         murice->enemy.direction, murice->enemy.enraged ? 30.0f : 20.0f, 0.5f,
+                         5.0f);
 
             float distance = Vector3Distance(murice->enemy.position, player->body.position);
-            float volume = 15.0f / (15.0f + distance);
+            float volume = 6.0f / (6.0f + distance);
 
             SetSoundVolume(*fxShoot, volume);
             SetSoundPitch(*fxShoot, 1.0f + (GetRandomValue(-100, 100) * 0.001));

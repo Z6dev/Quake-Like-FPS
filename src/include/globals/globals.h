@@ -16,6 +16,8 @@
 #define STAND_HEIGHT 1.0f
 #define BOTTOM_HEIGHT 0.5f
 
+#define FAR_CULL_DISTANCE 100.0f
+
 #define MAX_OBSTACLES 5
 extern Obstacle obstacles[];
 
@@ -52,6 +54,7 @@ extern int screenWidth;
 extern int screenHeight;
 
 extern bool GameInitialized;
+extern bool GamePaused;
 
 extern float firerate;
 
@@ -71,5 +74,7 @@ extern Texture2D boomAnimTexture;
 
 extern Texture2D teapotTexture;
 extern Texture2D studTexture;
+
+// ====================================== SHADERS ==========================================
 
 #endif
